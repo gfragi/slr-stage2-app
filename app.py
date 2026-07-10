@@ -696,6 +696,33 @@ def render_paper(ws, colmap, papers, idx, reviewer):
                          "Check that the sheet is shared with the service account as Editor.")
 
 
+def render_prisma_tab():
+    st.title("📊 SLR Progress So Far (PRISMA)")
+    st.caption("Snapshot of the review pipeline up to Stage 2 full-text screening.")
+
+    st.markdown(
+        f"🔗 The master data behind these figures lives in the "
+        f"[live Google Sheet](https://docs.google.com/spreadsheets/d/{SHEET_ID}/edit) "
+        f"— every reviewer already has permanent Editor access to it."
+    )
+    st.divider()
+
+    st.subheader("PRISMA Flow Diagram")
+    st.image("assets/FIG1_PRISMA_flow.png", use_container_width=True)
+
+    st.divider()
+    c1, c2 = st.columns(2)
+    with c1:
+        st.subheader("Publication Years")
+        st.image("assets/FIG2_years.png", use_container_width=True)
+    with c2:
+        st.subheader("Stage 2 Exclusion Reasons")
+        st.image("assets/FIG3_exclusion_reasons.png", use_container_width=True)
+
+    st.subheader("Quality-Appraisal Bands")
+    st.image("assets/FIG6_quality_bands.png", use_container_width=True)
+
+
 # ══════════════════════════════════════════════════════════════════════════════
 # MAIN
 # ══════════════════════════════════════════════════════════════════════════════
@@ -736,23 +763,29 @@ def main():
 
     render_sidebar(papers, reviewer)
 
-    st.title("📋 CERTAIN SLR — Stage 2 Full-Text Review")
-    st.caption("AI System Assessment vs. Ethical Requirements · Horizon Europe 101189650 · "
-               "HUA · Backend: live Google Sheet")
+    tab_review, tab_prisma = st.tabs(["📋 Stage 2 Review", "📊 PRISMA Progress"])
 
-    done = sum(1 for p in papers if p.get("s2_decision"))
-    inc = sum(1 for p in papers if p.get("s2_decision") == "Include")
-    exc = sum(1 for p in papers if p.get("s2_decision") == "Exclude")
-    may = sum(1 for p in papers if p.get("s2_decision") == "Maybe")
-    m1, m2, m3, m4, m5 = st.columns(5)
-    m1.metric("Total", len(papers))
-    m2.metric("Reviewed", f"{done} ({done / len(papers) * 100:.0f}%)" if papers else "0")
-    m3.metric("✅ Include", inc)
-    m4.metric("❌ Exclude", exc)
-    m5.metric("⚠️ Maybe", may)
+    with tab_review:
+        st.title("📋 CERTAIN SLR — Stage 2 Full-Text Review")
+        st.caption("AI System Assessment vs. Ethical Requirements · Horizon Europe 101189650 · "
+                   "HUA · Backend: live Google Sheet")
 
-    st.divider()
-    render_paper(ws, colmap, papers, st.session_state.idx, reviewer)
+        done = sum(1 for p in papers if p.get("s2_decision"))
+        inc = sum(1 for p in papers if p.get("s2_decision") == "Include")
+        exc = sum(1 for p in papers if p.get("s2_decision") == "Exclude")
+        may = sum(1 for p in papers if p.get("s2_decision") == "Maybe")
+        m1, m2, m3, m4, m5 = st.columns(5)
+        m1.metric("Total", len(papers))
+        m2.metric("Reviewed", f"{done} ({done / len(papers) * 100:.0f}%)" if papers else "0")
+        m3.metric("✅ Include", inc)
+        m4.metric("❌ Exclude", exc)
+        m5.metric("⚠️ Maybe", may)
+
+        st.divider()
+        render_paper(ws, colmap, papers, st.session_state.idx, reviewer)
+
+    with tab_prisma:
+        render_prisma_tab()
 
 
 if __name__ == "__main__":
