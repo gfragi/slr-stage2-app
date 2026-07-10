@@ -660,9 +660,11 @@ def render_paper(ws, colmap, papers, idx, reviewer):
             index=1 if p.get("accessible") == "No" else 0, key=f"acc_{idx}")
 
         dec_opts = ["Include", "Exclude", "Maybe"]
-        dec_idx = dec_opts.index(p["s2_decision"]) if p.get("s2_decision") in dec_opts else 0
-        p["s2_decision"] = st.radio("Decision", dec_opts, horizontal=True,
-                                    index=dec_idx, key=f"dec_{idx}")
+        dec_idx = dec_opts.index(p["s2_decision"]) if p.get("s2_decision") in dec_opts else None
+        dec_choice = st.radio("Decision", dec_opts, horizontal=True,
+                              index=dec_idx, key=f"dec_{idx}")
+        if dec_choice is not None:
+            p["s2_decision"] = dec_choice
 
         if p["s2_decision"] == "Exclude":
             er_opts = [""] + S2_EXCL_REASONS
